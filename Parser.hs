@@ -8,6 +8,8 @@ module Parser (
 import Control.Applicative ((<*>), (*>), (<*), (<$>))
 import Text.Parsec
 import Text.Parsec.String
+import qualified Data.Map as M
+import Data.List (foldl, foldl1)
 
 import Token
 
@@ -24,9 +26,10 @@ toToken :: String -> Either ParseError Exp
 toToken input = parse app "parse error" input
               
 app :: Parser Exp
-app = do
-  l <- lambda
-  (App l <$> app) <|> pure l
+app = (lefty <$> lambda <*> ls) <|> lambda
+  where
+    lefty x xs = foldl1 App (x:xs)
+    ls = many lambda
 
 lambda :: Parser Exp
 lambda = do
@@ -34,7 +37,7 @@ lambda = do
       spaces
       c <- oneOf ['a'..'z']
       spaces
-      (Lambda (c, 0) <$> (string "->" *> app))
+      Lambda (c, 0) <$> (string "->" *> app)
     <|> paren
 
 paren :: Parser Exp
