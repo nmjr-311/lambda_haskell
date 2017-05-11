@@ -33,11 +33,12 @@ app = (lefty <$> lambda <*> ls) <|> lambda
 
 lambda :: Parser Exp
 lambda = do
+      spaces
       _ <- char '\\'
       spaces
       c <- oneOf ['a'..'z']
       spaces
-      Lambda (c, 0) <$> (string "->" *> app)
+      Lambda (c, 0) <$> (spaces *> string "->" *> spaces *> app)
     <|> paren
 
 paren :: Parser Exp

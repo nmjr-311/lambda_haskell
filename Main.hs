@@ -23,6 +23,7 @@ main = do
             let t = analyzeExp e'
             putStrLn $ "input:\t" ++ toStr t
             eachIteration t
+            main
     _ -> do
       oneIteration str eval1
       main
