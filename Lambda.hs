@@ -27,20 +27,15 @@ test3 = App (App (Lambda ('x', 0)
 
 isNF :: Exp -> Bool
 isNF (Lambda _ nf) = isNF nf
-isNF e | isNAbsNF e  = True
-isNF _ = False
+isNF e = isNAbsNF e
 
 isNAbsNF :: Exp -> Bool
 isNAbsNF (Var _) = True
 isNAbsNF (App (Var _) v2) | isNF v2 = True
 isNAbsNF _ = False
 
-isNonAbs :: Exp -> Bool
-isNonAbs (Lambda _ _) = False
-isNonAbs _ = True
-
 eval1 :: Exp -> Exp
-eval1 (App na t) | isNonAbs na = App (eval1 na) t
+eval1 (App t1@(App _ _) t2) = App (eval1 t1) t2
 eval1 (App nanf t) | isNAbsNF nanf = App nanf (eval1 t)
 eval1 (Lambda x t) = Lambda x (eval1 t)
 eval1 (App (Lambda x t) t2) = betaReduction x t t2

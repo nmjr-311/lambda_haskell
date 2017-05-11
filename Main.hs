@@ -12,9 +12,10 @@ main = do
     ":q" -> return ()
     _ -> let e = toToken str in
          case e of
-           Left msg -> print msg >> main
+           Left msg -> putStrLn (show msg ++ "\n") >> main
            Right e' ->  do
-             putStrLn $ "input:\t" ++ show e'
-             let e'' = (eval1 . analyzeExp) e'
-             putStrLn $ "eval:\t" ++ toStr e''
+             let e'' = analyzeExp e'
+             putStrLn $ "input:\t" ++ toStr e''
+             putStrLn $ "eval:\t" ++ toStr (eval1 e'')
+             putStrLn ""
              main
