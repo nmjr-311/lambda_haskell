@@ -20,10 +20,12 @@ toStr (Lambda (c, n) e2) = (if n < 1
                            then ['\\',c]
                            else ['\\', c] ++ show n)
                                 ++ " -> " ++ toStr e2
+--toStr (App e1@(Var _) e2@(Var _)) = toStr e1 ++ toStr e2
 toStr (App e1@(Lambda _ _) e2) =
   case e2 of
     Var _ -> "(" ++ toStr e1 ++ ")" ++ toStr e2
     _ -> "(" ++ toStr e1 ++ ")" ++ "(" ++ toStr e2 ++  ")"
 toStr (App e1 e2@(App _ _)) = toStr e1 ++ "(" ++ toStr e2 ++  ")"
+toStr (App e1 e2@(Lambda _ _)) = toStr e1 ++ "(" ++ toStr e2 ++ ")"
 toStr (App e1 e2) =
   toStr e1 ++ toStr e2
