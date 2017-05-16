@@ -11,7 +11,7 @@ import Parser
 import Token
 
 type Enviroment = M.Map Char Int
-type EnvState = State (Enviroment, Int) Exp
+type EnvState = State Enviroment Exp
 
 test1 = (App (Lambda ('x', 0) (Var ('x', 0))) (Var ('y', 0)))
 test2 = (App (Lambda ('x', 0)
@@ -51,24 +51,31 @@ betaReduction replaced term sbst = go term
     go (App t1 t2) = App (go t1) (go t2)
 
 analyzeExp :: Exp -> Exp
-analyzeExp t = evalState (go t) (M.empty, 0) 
+analyzeExp t = evalState (go t) M.empty 
   where
     go :: Exp -> EnvState
     go t' = case t' of
       Var (x, _) -> do
-        (memo, _) <- get
+        memo <- get
         let y = M.lookup x memo
         case y of
           Nothing -> return $ Var (x, -1)
           Just y' -> return $ Var (x, y')
       Lambda (x, _) t1 -> do
-        (memo, n) <- get
-        put (M.insert x n memo, n+1)
-        t1' <- go t1
-        return $ Lambda (x, n) t1'
+        memo <- get
+        let y = M.lookup x memo
+        case y of
+          Nothing -> do
+            modify (M.insert x 0)
+            t1' <- go t1
+            return $ Lambda (x, 0) t1'
+          Just y' -> do
+            modify (M.insert x (y'+1))
+            t1' <- go t1
+            return $ Lambda (x, y'+1) t1'
       App t1 t2 -> do
-        (memo, n) <- get
+        memo <- get
         t1' <- go t1
-        put (memo, n)
+        put memo
         t2' <- go t2
         return $ App t1' t2'

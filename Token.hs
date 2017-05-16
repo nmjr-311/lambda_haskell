@@ -13,6 +13,17 @@ instance Eq Exp where
   _ == _  = False
   
 toStr :: Exp -> String
-toStr (Var (c, _)) = [c]
-toStr (Lambda (c, _) e2) = ['(','\\',c] ++ " -> " ++ toStr e2 ++ ")"
-toStr (App e1 e2) =  "(" ++ toStr e1 ++ ")" ++ "(" ++ toStr e2 ++  ")"
+toStr (Var (c, n)) = if n < 1
+                     then [c]
+                     else c : show n
+toStr (Lambda (c, n) e2) = (if n < 1
+                           then ['\\',c]
+                           else ['\\', c] ++ show n)
+                                ++ " -> " ++ toStr e2
+toStr (App e1@(Lambda _ _) e2) =
+  case e2 of
+    Var _ -> "(" ++ toStr e1 ++ ")" ++ toStr e2
+    _ -> "(" ++ toStr e1 ++ ")" ++ "(" ++ toStr e2 ++  ")"
+toStr (App e1 e2@(App _ _)) = toStr e1 ++ "(" ++ toStr e2 ++  ")"
+toStr (App e1 e2) =
+  toStr e1 ++ toStr e2
